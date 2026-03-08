@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For You</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pink: #e91e8c;
+    --pink-light: #f8a4d0;
+    --pink-soft: #fce4f1;
+    --rose: #ff6b9d;
+    --gold: #d4a574;
+    --cream: #fff5f9;
+    --deep: #8b1a5a;
+    --wine: #6b1d4a;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--cream);
+    overflow: hidden;
+  }
+
+  /* ===================== ENTRY GATE ===================== */
+  #entry-gate {
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a0a12 0%, #2d1025 30%, #3d1535 60%, #1a0a12 100%);
+    transition: opacity 0.8s, transform 0.8s;
+  }
+  #entry-gate.open {
+    opacity: 0;
+    transform: scale(1.1);
+    pointer-events: none;
+  }
+
+  .gate-container {
+    text-align: center;
+    perspective: 1200px;
+  }
+
+  .gate-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2.8rem;
+    color: var(--pink-light);
+    margin-bottom: 10px;
+    text-shadow: 0 0 30px rgba(233,30,140,0.4);
+    animation: floatText 3s ease-in-out infinite;
+  }
+  .gate-subtitle {
+    color: #c9a0b5;
+    font-size: 0.95rem;
+    margin-bottom: 40px;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+
+  /* Door */
+  .door-frame {
+    width: 220px; height: 340px;
+    margin: 0 auto 30px;
+    position: relative;
+    background: linear-gradient(180deg, var(--gold) 0%, #a67c52 100%);
+    border-radius: 110px 110px 0 0;
+    padding: 8px;
+    box-shadow: 0 0 60px rgba(233,30,140,0.3), inset 0 0 20px rgba(0,0,0,0.3);
+  }
+  .door-panel {
+    width: 100%; height: 100%;
+    background: linear-gradient(180deg, #5c2d42 0%, #3d1a2c 40%, #2a1020 100%);
+    border-radius: 106px 106px 0 0;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: left center;
+  }
+  .door-panel.opened {
+    transform: perspective(600px) rotateY(-75deg);
+  }
+  .door-knob {
+    position: absolute;
+    right: 20px; top: 55%;
+    width: 20px; height: 20px;
+    background: radial-gradient(circle, #f0d0a0, var(--gold));
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(212,165,116,0.6);
+  }
+  .door-lock {
+    position: absolute;
+    right: 15px; top: 45%;
+    width: 30px; height: 22px;
+    background: var(--gold);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .door-lock::after {
+    content: '';
+    width: 8px; height: 8px;
+    background: #2a1020;
+    border-radius: 50%;
+  }
+  .door-heart {
+    position: absolute;
+    top: 25%; left: 50%; transform: translateX(-50%);
+    font-size: 2.5rem;
+    opacity: 0.3;
+    color: var(--pink);
+  }
+  .door-light {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 30%, rgba(255,200,230,0.15), transparent 60%);
+  }
+
+  /* Password area */
+  .password-section {
+    margin-top: 10px;
+  }
+  .password-hint {
+    color: var(--pink-light);
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+    font-style: italic;
+    opacity: 0.8;
+  }
+  .date-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+  .date-separator {
+    color: var(--pink-light);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 2px;
+  }
+  .otp-box {
+    width: 44px; height: 54px;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(233,30,140,0.3);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--pink-light);
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    transition: all 0.3s;
+    caret-color: var(--pink);
+  }
+  .otp-box:focus {
+    border-color: var(--pink);
+    background: rgba(233,30,140,0.12);
+    box-shadow: 0 0 15px rgba(233,30,140,0.3);
+  }
+  .otp-box.error {
+    border-color: #ff4444;
+    animation: shake 0.5s;
+  }
+  .otp-box.success {
+    border-color: #44ff88;
+    background: rgba(68,255,136,0.1);
+  }
+
+  .gate-btn {
+    background: linear-gradient(135deg, var(--pink) 0%, var(--rose) 100%);
+    color: white;
+    border: none;
+    padding: 14px 50px;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 25px rgba(233,30,140,0.4);
+  }
+  .gate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 35px rgba(233,30,140,0.6);
+  }
+  .gate-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .error-msg {
+    color: #ff6b8a;
+    font-size: 0.8rem;
+    margin-top: 12px;
+    min-height: 20px;
+    transition: opacity 0.3s;
+  }
+
+  /* ===================== MAIN WORLD ===================== */
+  #main-world {
+    display: none;
+    width: 4000px;
+    height: 3000px;
+    position: relative;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(233,30,140,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 60%, rgba(255,107,157,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(212,165,116,0.05) 0%, transparent 50%),
+      var(--cream);
+    cursor: grab;
+  }
+  #main-world:active { cursor: grabbing; }
+
+  /* Decorative elements */
+  .world-decor {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.08;
+    font-size: 3rem;
+  }
+
+  /* Scroll hint */
+  .scroll-hint {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    background: rgba(139,26,90,0.85);
+    color: white;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    backdrop-filter: blur(10px);
+    animation: fadeInUp 1s 0.5s both, pulse 2s 2s infinite;
+    pointer-events: none;
+    transition: opacity 1s;
+  }
+  .scroll-hint.hidden { opacity: 0; }
+
+  /* ===================== SPOTLIGHT & FLOATING EMOJIS ===================== */
+  .spotlight-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    background:
+      radial-gradient(ellipse 600px 500px at var(--sx, 50%) var(--sy, 50%),
+        rgba(233,30,140,0.08) 0%,
+        rgba(233,30,140,0.03) 40%,
+        transparent 70%);
+    transition: background 0.1s;
+  }
+
+  .floating-emoji {
+    position: fixed;
+    pointer-events: none;
+    z-index: 45;
+    opacity: 0;
+    font-size: 1.6rem;
+    animation: floatEmoji linear infinite;
+    filter: blur(0.3px);
+  }
+  @keyframes floatEmoji {
+    0% {
+      opacity: 0;
+      transform: translateY(0) rotate(0deg) scale(0.5);
+    }
+    10% { opacity: 0.6; transform: translateY(-10vh) rotate(20deg) scale(0.9); }
+    50% { opacity: 0.35; transform: translateY(-50vh) rotate(180deg) scale(1); }
+    90% { opacity: 0.15; transform: translateY(-90vh) rotate(340deg) scale(0.7); }
+    100% {
+      opacity: 0;
+      transform: translateY(-105vh) rotate(360deg) scale(0.4);
+    }
+  }
+
+  /* ===================== ROOM DOORS (3D REALISTIC) ===================== */
+  .room-door {
+    position: absolute;
+    width: 220px;
+    text-align: center;
+    cursor: pointer;
+    perspective: 800px;
+    transition: transform 0.3s;
+  }
+  .room-door:hover { transform: scale(1.04); }
+
+  /* Wall surround */
+  .door-wall {
+    width: 190px; height: 290px;
+    margin: 0 auto 14px;
+    position: relative;
+    border-radius: 6px;
+    /* Stone/wall texture around the door */
+    background:
+      linear-gradient(135deg, #e8ddd0 0%, #d4c8b8 50%, #c4b8a6 100%);
+    box-shadow:
+      0 12px 40px rgba(0,0,0,0.25),
+      0 0 0 3px #b8a892,
+      inset 0 0 30px rgba(0,0,0,0.1);
+    padding: 14px 14px 0 14px;
+  }
+
+  /* The actual door */
+  .room-door-body {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border-radius: 4px 4px 0 0;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: left center;
+    /* Wood grain base */
+    background-repeat: no-repeat;
+    background-size: cover;
+    box-shadow:
+      inset 0 0 0 2px rgba(0,0,0,0.15),
+      inset 3px 0 8px rgba(255,255,255,0.1),
+      inset -3px 0 8px rgba(0,0,0,0.15),
+      2px 0 6px rgba(0,0,0,0.2);
+  }
+  .room-door:hover .room-door-body {
+    transform: perspective(800px) rotateY(-6deg);
+  }
+
+  /* Wood grain overlay */
+  .room-door-body::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 4px 4px 0 0;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0px,
+        rgba(0,0,0,0.03) 2px,
+        transparent 4px,
+        rgba(0,0,0,0.02) 8px,
+        transparent 12px
+      ),
+      repeating-linear-gradient(
+        175deg,
+        transparent 0px,
+        rgba(0,0,0,0.015) 20px,
+        transparent 40px
+      );
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Door panels (raised rectangles like a real door) */
+  .door-panel-top, .door-panel-bottom {
+    position: absolute;
+    left: 14px; right: 14px;
+    border-radius: 4px;
+    border: 2px solid rgba(0,0,0,0.12);
+    box-shadow:
+      inset 0 2px 4px rgba(255,255,255,0.15),
+      inset 0 -2px 4px rgba(0,0,0,0.15),
+      0 1px 3px rgba(0,0,0,0.1);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .door-panel-top {
+    top: 18px;
+    height: 35%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.06) 100%);
+  }
+  .door-panel-bottom {
+    top: 60%;
+    height: 30%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.08) 100%);
+  }
+
+  /* Door content (icon, year) overlay */
+  .room-door-content {
+    position: absolute; inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .room-door-content .door-icon {
+    font-size: 2.8rem;
+    filter: drop-shadow(0 3px 10px rgba(0,0,0,0.5));
+  }
+  .room-door-content .door-year {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+  }
+
+  /* Door knob - realistic round knob with plate */
+  .door-knob-3d {
+    position: absolute;
+    right: 16px;
+    top: 52%;
+    z-index: 4;
+    pointer-events: none;
+  }
+  .knob-plate {
+    width: 18px; height: 38px;
+    background: linear-gradient(180deg, #e8d5a8, #c4a465, #b8943a);
+    border-radius: 9px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    position: relative;
+  }
+  .knob-plate::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: 50%; transform: translateX(-50%);
+    width: 6px; height: 6px;
+    background: #2a1a0a;
+    border-radius: 50%;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+  }
+  .knob-ball {
+    width: 22px; height: 22px;
+    background: radial-gradient(circle at 35% 35%, #f5e6c0, #d4b060, #a88030);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow:
+      0 2px 6px rgba(0,0,0,0.4),
+      inset 0 -2px 4px rgba(0,0,0,0.2),
+      inset 0 2px 4px rgba(255,255,255,0.4);
+  }
+
+  /* Hinges */
+  .door-hinge {
+    position: absolute;
+    left: -2px;
+    width: 8px; height: 20px;
+    background: linear-gradient(90deg, #b8943a, #d4b060, #b8943a);
+    border-radius: 2px;
+    z-index: 5;
+    box-shadow: 1px 0 3px rgba(0,0,0,0.3);
+    pointer-events: none;
+  }
+  .door-hinge::after {
+    content: '';
+    position: absolute;
+    top: 4px; left: 1px;
+    width: 6px; height: 4px;
+    background: #a88030;
+    border-radius: 1px;
+  }
+  .door-hinge.top { top: 30px; }
+  .door-hinge.bottom { bottom: 40px; }
+
+  /* Peephole */
+  .door-peephole {
+    position: absolute;
+    top: 22%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #1a0a05, #3d2015);
+    border: 2px solid #b8943a;
+    z-index: 4;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.3);
+    pointer-events: none;
+  }
+
+  /* Light seeping from under door */
+  .door-underlight {
+    position: absolute;
+    bottom: -4px;
+    left: 10%;
+    width: 80%;
+    height: 8px;
+    border-radius: 50%;
+    filter: blur(4px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .room-door-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--deep);
+    line-height: 1.3;
+    max-width: 200px;
+    margin: 0 auto;
+    text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+  }
+
+  /* Door wood color themes */
+  .door-feelings-2023 .room-door-body { background-color: #6b2040; background-image: linear-gradient(180deg, #8b2858 0%, #5c1835 60%, #4a1028 100%); }
+  .door-feelings-2024 .room-door-body { background-color: #a04060; background-image: linear-gradient(180deg, #c05575 0%, #903555 60%, #7a2845 100%); }
+  .door-feelings-2025 .room-door-body { background-color: #6b4a28; background-image: linear-gradient(180deg, #8b6538 0%, #6b4a28 60%, #5a3c1e 100%); }
+  .door-feelings-2026 .room-door-body { background-color: #9b5575; background-image: linear-gradient(180deg, #b8708a 0%, #9b5575 60%, #854565 100%); }
+  .door-hurt-1 .room-door-body { background-color: #3d2240; background-image: linear-gradient(180deg, #5a3860 0%, #3d2240 60%, #2d1830 100%); }
+  .door-hurt-2 .room-door-body { background-color: #2d1a30; background-image: linear-gradient(180deg, #4a3050 0%, #2d1a30 60%, #201020 100%); }
+  .door-hurt-3 .room-door-body { background-color: #4a2a42; background-image: linear-gradient(180deg, #603858 0%, #4a2a42 60%, #3a2035 100%); }
+  .door-womens-day .room-door-body { background-color: #c04080; background-image: linear-gradient(180deg, #e05898 0%, #c04080 60%, #a03068 100%); }
+  .door-gift .room-door-body { background-color: #8b6520; background-image: linear-gradient(180deg, #b08528 0%, #8b6520 60%, #705018 100%); }
+  .door-love .room-door-body { background-color: #8b0050; background-image: linear-gradient(180deg, #b01068 0%, #8b0050 60%, #700040 100%); }
+
+  /* Under-door light colors */
+  .door-feelings-2023 .door-underlight { background: rgba(233,30,140,0.5); }
+  .door-feelings-2024 .door-underlight { background: rgba(255,107,157,0.5); }
+  .door-feelings-2025 .door-underlight { background: rgba(212,165,116,0.5); }
+  .door-feelings-2026 .door-underlight { background: rgba(248,164,208,0.5); }
+  .door-hurt-1 .door-underlight { background: rgba(160,120,170,0.4); }
+  .door-hurt-2 .door-underlight { background: rgba(140,100,150,0.4); }
+  .door-hurt-3 .door-underlight { background: rgba(170,130,160,0.4); }
+  .door-womens-day .door-underlight { background: rgba(255,105,180,0.6); }
+  .door-gift .door-underlight { background: rgba(255,215,0,0.6); }
+  .door-love .door-underlight { background: rgba(255,20,147,0.6); }
+
+  /* Spotlight glow around door on hover */
+  .door-wall::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    border-radius: 16px;
+    background: radial-gradient(ellipse at center, rgba(233,30,140,0.2), transparent 70%);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+  .room-door:hover .door-wall::before { opacity: 1; }
+
+  /* Doormat */
+  .door-mat {
+    width: 120px; height: 16px;
+    margin: -2px auto 10px;
+    background: linear-gradient(90deg, #8b6540, #a07850, #8b6540);
+    border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  .door-mat::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent 0px, rgba(0,0,0,0.08) 3px, transparent 6px);
+  }
+
+  /* ===================== MODAL ===================== */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(26,10,18,0.85);
+    backdrop-filter: blur(12px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .modal-overlay.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal-content {
+    background: white;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    border-radius: 24px;
+    overflow-y: auto;
+    position: relative;
+    animation: modalIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+  }
+
+  .modal-header {
+    position: sticky; top: 0;
+    padding: 28px 30px 20px;
+    background: white;
+    border-bottom: 1px solid var(--pink-soft);
+    z-index: 2;
+  }
+  .modal-header h2 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2rem;
+    color: var(--deep);
+  }
+  .modal-header p {
+    color: #999;
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+  .modal-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--pink-soft);
+    color: var(--deep);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+  }
+  .modal-close:hover {
+    background: var(--pink);
+    color: white;
+  }
+
+  .modal-body {
+    padding: 30px;
+  }
+  .modal-body p {
+    color: #555;
+    line-height: 1.8;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+  }
+  .modal-body p:last-child { margin-bottom: 0; }
+
+  .modal-body .letter-text {
+    font-style: italic;
+    color: var(--deep);
+    background: var(--pink-soft);
+    padding: 20px 24px;
+    border-radius: 16px;
+    border-left: 4px solid var(--pink);
+    margin-bottom: 16px;
+    line-height: 1.9;
+  }
+
+  /* ===================== GIFT ROOM ===================== */
+  .gift-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .gift-card {
+    background: var(--pink-soft);
+    border: 2px solid transparent;
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .gift-card:hover {
+    border-color: var(--pink);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(233,30,140,0.15);
+  }
+  .gift-card.selected {
+    border-color: var(--pink);
+    background: linear-gradient(135deg, var(--pink-soft), #ffe8f5);
+  }
+  .gift-card .gift-icon { font-size: 2.2rem; margin-bottom: 8px; }
+  .gift-card .gift-name {
+    font-weight: 600;
+    color: var(--deep);
+    font-size: 0.9rem;
+  }
+
+  .gift-order-section {
+    margin-top: 24px;
+    text-align: center;
+  }
+  .gift-selected-list {
+    margin-bottom: 16px;
+    min-height: 30px;
+    color: var(--deep);
+    font-size: 0.9rem;
+  }
+  .order-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--pink), var(--rose));
+    color: white;
+    text-decoration: none;
+    padding: 14px 40px;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(233,30,140,0.3);
+    border: none;
+    cursor: pointer;
+  }
+  .order-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(233,30,140,0.5);
+  }
+
+  /* Women's Day special */
+  .womens-day-content {
+    text-align: center;
+  }
+  .womens-day-content .big-wish {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2.5rem;
+    color: var(--pink);
+    margin-bottom: 20px;
+    line-height: 1.3;
+  }
+  .flower-row {
+    font-size: 2rem;
+    letter-spacing: 8px;
+    margin: 20px 0;
+  }
+
+  /* ===================== PARTICLES ===================== */
+  .particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 999;
+    animation: particleFall linear forwards;
+  }
+
+  /* ===================== ANIMATIONS ===================== */
+  @keyframes floatText {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+  @keyframes modalIn {
+    from { transform: scale(0.85) translateY(30px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  @keyframes particleFall {
+    to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+  }
+  @keyframes doorAppear {
+    from { opacity: 0; transform: scale(0.7) translateY(30px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .room-door {
+    animation: doorAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--pink-soft); }
+  ::-webkit-scrollbar-thumb { background: var(--pink-light); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--pink); }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .gate-title { font-size: 2rem; }
+    .otp-box { width: 36px; height: 46px; font-size: 1.1rem; }
+    .door-frame { width: 180px; height: 280px; }
+    .door-wall { width: 150px; height: 230px; }
+    .room-door-content .door-icon { font-size: 2rem; }
+    .room-door-content .door-year { font-size: 1.4rem; }
+    .modal-content { width: 95%; border-radius: 18px; }
+    .gift-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== ENTRY GATE ==================== -->
+<div id="entry-gate">
+  <div class="gate-container">
+    <h1 class="gate-title">A Door Just For You</h1>
+    <p class="gate-subtitle">Enter the password to unlock what's inside</p>
+
+    <div class="door-frame">
+      <div class="door-panel" id="gate-door">
+        <div class="door-heart">&hearts;</div>
+        <div class="door-lock"></div>
+        <div class="door-knob"></div>
+        <div class="door-light"></div>
+      </div>
+    </div>
+
+    <div class="password-section">
+      <p class="password-hint">Hint: My birthday date (DD-MM-YYYY)</p>
+      <div class="date-group">
+        <input class="otp-box" type="text" maxlength="1" data-index="0" inputmode="numeric">
+        <input class="otp-box" type="text" maxlength="1" data-index="1" inputmode="numeric">
+        <span class="date-separator">-</span>
+        <input class="otp-box" type="text" maxlength="1" data-index="2" inputmode="numeric">
+        <input class="otp-box" type="text" maxlength="1" data-index="3" inputmode="numeric">
+        <span class="date-separator">-</span>
+        <input class="otp-box" type="text" maxlength="1" data-index="4" inputmode="numeric">
+        <input class="otp-box" type="text" maxlength="1" data-index="5" inputmode="numeric">
+        <input class="otp-box" type="text" maxlength="1" data-index="6" inputmode="numeric">
+        <input class="otp-box" type="text" maxlength="1" data-index="7" inputmode="numeric">
+      </div>
+      <button class="gate-btn" id="unlock-btn" onclick="checkPassword()">Unlock</button>
+      <p class="error-msg" id="error-msg"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SPOTLIGHT LAYER ==================== -->
+<div class="spotlight-layer" id="spotlight-layer"></div>
+
+<!-- ==================== MAIN SCROLLABLE WORLD ==================== -->
+<div id="main-world">
+  <!-- Doors are placed via JS -->
+</div>
+
+<div class="scroll-hint" id="scroll-hint">Scroll or drag to explore all the doors</div>
+
+<!-- ==================== MODAL ==================== -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-content" id="modal-content">
+    <div class="modal-header">
+      <h2 id="modal-title"></h2>
+      <p id="modal-subtitle"></p>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ==================== PASSWORD LOGIC ====================
+const PASSWORD = '30032002';
+const otpBoxes = document.querySelectorAll('.otp-box');
+
+otpBoxes.forEach((box, i) => {
+  box.addEventListener('input', (e) => {
+    const val = e.target.value;
+    if (val && i < otpBoxes.length - 1) {
+      otpBoxes[i + 1].focus();
+    }
+    // Auto-check when all filled
+    if (i === otpBoxes.length - 1 && val) {
+      setTimeout(() => checkPassword(), 150);
+    }
+  });
+  box.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && !box.value && i > 0) {
+      otpBoxes[i - 1].focus();
+    }
+    if (e.key === 'Enter') checkPassword();
+  });
+  // Handle paste
+  box.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').replace(/-/g, '');
+    for (let j = 0; j < pasted.length && i + j < otpBoxes.length; j++) {
+      otpBoxes[i + j].value = pasted[j];
+    }
+    const nextIdx = Math.min(i + pasted.length, otpBoxes.length - 1);
+    otpBoxes[nextIdx].focus();
+  });
+});
+
+function checkPassword() {
+  let entered = '';
+  otpBoxes.forEach(b => entered += b.value);
+
+  if (entered.length < 8) {
+    document.getElementById('error-msg').textContent = 'Please fill in all digits';
+    return;
+  }
+
+  if (entered === PASSWORD) {
+    otpBoxes.forEach(b => b.classList.add('success'));
+    document.getElementById('error-msg').textContent = '';
+    document.getElementById('gate-door').classList.add('opened');
+
+    setTimeout(() => {
+      document.getElementById('entry-gate').classList.add('open');
+      launchParticles();
+      setTimeout(() => {
+        document.getElementById('entry-gate').style.display = 'none';
+        document.getElementById('main-world').style.display = 'block';
+        document.body.style.overflow = 'auto';
+        initWorld();
+        startFloatingEmojis();
+      }, 800);
+    }, 600);
+  } else {
+    otpBoxes.forEach(b => b.classList.add('error'));
+    document.getElementById('error-msg').textContent = 'Wrong password, try again!';
+    setTimeout(() => {
+      otpBoxes.forEach(b => { b.classList.remove('error'); b.value = ''; });
+      otpBoxes[0].focus();
+    }, 700);
+  }
+}
+
+// ==================== PARTICLES ====================
+function launchParticles() {
+  const emojis = ['\u2764', '\u2728', '\u{1F338}', '\u{1F49D}', '\u2B50', '\u{1F33A}'];
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.top = '-30px';
+      p.style.fontSize = (Math.random() * 20 + 14) + 'px';
+      p.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 4000);
+    }, i * 80);
+  }
+}
+
+// ==================== WORLD & DOORS ====================
+const rooms = [
+  {
+    id: 'feelings-2023', cls: 'door-feelings-2023',
+    icon: '\u{1F495}', year: '2023',
+    label: 'What I Never Said',
+    x: 300, y: 200,
+    title: '2023 - Words I Kept Inside',
+    subtitle: 'The year it all began',
+    content: `
+      <p class="letter-text">When we first started, I was so caught up in just being with you that I forgot to say
+      the most important things. I want you to know that from the very beginning, you made my world brighter.
+      Every moment we shared that year was a gift I never fully acknowledged.</p>
+      <p class="letter-text">I should have told you more often how your laugh makes everything feel okay,
+      how just seeing your name on my phone made my whole day better. I was feeling so much but saying so little.
+      I'm sorry for every silent moment where I should have spoken up and told you how deeply I cared.</p>
+      <p class="letter-text">You deserved to hear "you're amazing" every single day of 2023, and I didn't say it enough. I'm saying it now.</p>
+    `
+  },
+  {
+    id: 'feelings-2024', cls: 'door-feelings-2024',
+    icon: '\u{1F496}', year: '2024',
+    label: 'Still Learning To Say It',
+    x: 900, y: 350,
+    title: '2024 - Growing But Still Quiet',
+    subtitle: 'Another year of unspoken words',
+    content: `
+      <p class="letter-text">2024 came and I was still holding back. We grew so much together but I kept
+      my deepest feelings locked away, thinking you just knew. But you deserved to hear them.</p>
+      <p class="letter-text">I should have told you that you're the reason I try harder at everything.
+      That when things got tough, it was the thought of you that kept me going. That your strength
+      inspires me more than you'll ever know.</p>
+      <p class="letter-text">Every time you doubted yourself, I should have been louder about how incredible you are.
+      I'm sorry for the silence when you needed my words the most.</p>
+    `
+  },
+  {
+    id: 'feelings-2025', cls: 'door-feelings-2025',
+    icon: '\u{1F49B}', year: '2025',
+    label: 'Words Long Overdue',
+    x: 1600, y: 180,
+    title: '2025 - Breaking The Silence',
+    subtitle: 'Better late than never',
+    content: `
+      <p class="letter-text">By 2025 I started realizing how much time I'd wasted not telling you things.
+      You are not just my girlfriend - you are my safe place, my favorite person, my home.</p>
+      <p class="letter-text">I should have said it more: I'm proud of you. I admire you.
+      You make me want to be a better person every day. The way you care about people,
+      the way you love - it's extraordinary and I never said that enough.</p>
+      <p class="letter-text">Thank you for staying even when my words weren't there. I promise to do better.</p>
+    `
+  },
+  {
+    id: 'feelings-2026', cls: 'door-feelings-2026',
+    icon: '\u{1F497}', year: '2026',
+    label: 'No More Silence',
+    x: 2400, y: 400,
+    title: '2026 - From Now On',
+    subtitle: 'This is my promise',
+    content: `
+      <p class="letter-text">This year, I'm done being quiet. You are the most beautiful soul I've ever known,
+      inside and out. I love the way you think, the way you dream, the way you make even ordinary days special.</p>
+      <p class="letter-text">I love you. Not just as words but as everything I do from here on out.
+      Every day I'll make sure you know it, feel it, and never have to wonder again.</p>
+      <p class="letter-text">You're my today, my tomorrow, and every day after that. No more unspoken feelings. Just us.</p>
+    `
+  },
+  {
+    id: 'hurt-1', cls: 'door-hurt-1',
+    icon: '\u{1F494}', year: '',
+    label: 'Something I Carried Alone',
+    x: 600, y: 900,
+    title: 'The Weight I Carried',
+    subtitle: 'Things left unsaid',
+    content: `
+      <p class="letter-text">There were times I felt like my feelings didn't matter as much,
+      like I had to always be the strong one and never show when something hurt me.
+      I bottled it up because I didn't want to seem weak or start a fight.</p>
+      <p class="letter-text">But carrying it alone made it heavier. I want you to know this isn't blame -
+      it's me finally being honest so we can grow from it. I need you to know that my silence
+      was never about not caring. It was about caring too much and not knowing how to say it.</p>
+      <p class="letter-text">I just want us to be a place where both of us can be vulnerable without fear.</p>
+    `
+  },
+  {
+    id: 'hurt-2', cls: 'door-hurt-2',
+    icon: '\u{1F494}', year: '',
+    label: 'When I Felt Unseen',
+    x: 1300, y: 1100,
+    title: 'Moments I Felt Invisible',
+    subtitle: 'Honest words from my heart',
+    content: `
+      <p class="letter-text">Sometimes I felt like my efforts went unnoticed - the small things I did
+      to make you smile, the times I put your needs before mine. I didn't need a trophy,
+      just a "thank you" or "I see you" would have meant the world.</p>
+      <p class="letter-text">I know you never meant to overlook them. Life gets busy, we all get caught up.
+      But I wanted you to know it stung sometimes. Not because you're a bad person -
+      you're incredible - but because when you love someone this much, even small things feel big.</p>
+      <p class="letter-text">I'm telling you now so it doesn't sit between us anymore. I love you too much to let anything stay hidden.</p>
+    `
+  },
+  {
+    id: 'hurt-3', cls: 'door-hurt-3',
+    icon: '\u{1F494}', year: '',
+    label: 'Learning To Heal Together',
+    x: 2100, y: 950,
+    title: 'What I Need You To Know',
+    subtitle: 'So we can move forward',
+    content: `
+      <p class="letter-text">There were moments when words were said in anger that stuck with me
+      longer than either of us expected. I never brought them up again because I didn't want to reopen wounds,
+      but they left marks I've been quietly healing from.</p>
+      <p class="letter-text">I don't say this to make you feel bad. I say it because I believe we're strong enough
+      to face these things together. Every relationship has rough edges - ours is no different.
+      But I'd rather polish them together than pretend they don't exist.</p>
+      <p class="letter-text">You are worth every hard conversation. We are worth it. Let's keep growing, together.</p>
+    `
+  },
+  {
+    id: 'womens-day', cls: 'door-womens-day',
+    icon: '\u{1F338}', year: '',
+    label: "Happy Women's Day!",
+    x: 2800, y: 250,
+    title: "Happy Women's Day, My Love",
+    subtitle: 'March 8th, 2026',
+    content: `
+      <div class="womens-day-content">
+        <div class="flower-row">\u{1F33A}\u{1F337}\u{1F33B}\u{1F338}\u{1F33C}\u{1F337}\u{1F33A}</div>
+        <p class="big-wish">Happy Women's Day to the most extraordinary woman in my life!</p>
+        <p>Today the world celebrates women, but I celebrate you every day.
+        You are strong, beautiful, kind, and so much more than words could ever capture.</p>
+        <p>You inspire me with your resilience, your warmth, and the way you light up every room.
+        Thank you for being exactly who you are - unapologetically, beautifully you.</p>
+        <p>I am so lucky to have you. Today and always.</p>
+        <div class="flower-row">\u{1F490}\u2764\u{1F490}</div>
+        <p style="font-family:'Dancing Script',cursive; font-size:1.5rem; color:var(--pink); margin-top:10px;">
+          With all my love, forever yours
+        </p>
+      </div>
+    `
+  },
+  {
+    id: 'gift', cls: 'door-gift',
+    icon: '\u{1F381}', year: '',
+    label: 'Your Gift Room',
+    x: 3200, y: 700,
+    title: 'Pick Your Gift!',
+    subtitle: 'Choose what you\'d like and I\'ll make it happen',
+    content: 'GIFT_ROOM'
+  },
+  {
+    id: 'love', cls: 'door-love',
+    icon: '\u{1F48C}', year: '',
+    label: 'A Love Letter',
+    x: 1800, y: 1500,
+    title: 'My Love Letter To You',
+    subtitle: 'Read this when you need to feel loved',
+    content: `
+      <p class="letter-text">My love,</p>
+      <p class="letter-text">If you're reading this, just know that wherever I am right now,
+      I'm thinking about you. You are the first thought in my morning and the last one before I sleep.
+      You've given my life a kind of meaning I never knew I was missing.</p>
+      <p class="letter-text">I know I'm not perfect. I know there are things I should say more,
+      things I should do better. But one thing that will never change is how deeply,
+      completely, and endlessly I love you.</p>
+      <p class="letter-text">You are my person. In every universe, in every timeline, I'd find you and choose you again.</p>
+      <p class="letter-text">Forever yours,<br>Anthony</p>
+    `
+  }
+];
+
+// Phone number for ordering
+const PHONE_NUMBER = '2347030175401';
+
+function initWorld() {
+  const world = document.getElementById('main-world');
+
+  // Add decorative elements
+  const decors = ['\u2764', '\u2728', '\u{1F338}', '\u{1F33A}', '\u{1F49D}', '\u2B50'];
+  for (let i = 0; i < 60; i++) {
+    const d = document.createElement('div');
+    d.className = 'world-decor';
+    d.textContent = decors[Math.floor(Math.random() * decors.length)];
+    d.style.left = Math.random() * 3800 + 'px';
+    d.style.top = Math.random() * 2800 + 'px';
+    d.style.fontSize = (Math.random() * 40 + 20) + 'px';
+    d.style.transform = `rotate(${Math.random() * 360}deg)`;
+    world.appendChild(d);
+  }
+
+  // Place doors
+  rooms.forEach((room, i) => {
+    const door = document.createElement('div');
+    door.className = `room-door ${room.cls}`;
+    door.style.left = room.x + 'px';
+    door.style.top = room.y + 'px';
+    door.style.animationDelay = (i * 0.1) + 's';
+    door.onclick = () => openRoom(room);
+
+    door.innerHTML = `
+      <div class="door-wall">
+        <div class="room-door-body">
+          <div class="door-panel-top"></div>
+          <div class="door-panel-bottom"></div>
+          <div class="door-peephole"></div>
+          <div class="room-door-content">
+            <span class="door-icon">${room.icon}</span>
+            ${room.year ? `<span class="door-year">${room.year}</span>` : ''}
+          </div>
+          <div class="door-knob-3d">
+            <div class="knob-plate">
+              <div class="knob-ball"></div>
+            </div>
+          </div>
+          <div class="door-hinge top"></div>
+          <div class="door-hinge bottom"></div>
+        </div>
+        <div class="door-underlight"></div>
+      </div>
+      <div class="door-mat"></div>
+      <div class="room-door-label">${room.label}</div>
+    `;
+    world.appendChild(door);
+  });
+
+  // Scroll to center-ish
+  window.scrollTo({ left: 100, top: 100, behavior: 'smooth' });
+
+  // Hide hint after scrolling
+  let scrolled = false;
+  window.addEventListener('scroll', () => {
+    if (!scrolled) {
+      scrolled = true;
+      setTimeout(() => {
+        document.getElementById('scroll-hint').classList.add('hidden');
+      }, 2000);
+    }
+  });
+
+  // Enable drag to scroll
+  let isDragging = false, startX, startY, scrollL, scrollT;
+  world.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.room-door')) return;
+    isDragging = true;
+    startX = e.pageX; startY = e.pageY;
+    scrollL = window.scrollX; scrollT = window.scrollY;
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    window.scrollTo(scrollL - (e.pageX - startX), scrollT - (e.pageY - startY));
+  });
+  window.addEventListener('mouseup', () => isDragging = false);
+}
+
+// ==================== MODAL ====================
+function openRoom(room) {
+  const overlay = document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent = room.title;
+  document.getElementById('modal-subtitle').textContent = room.subtitle;
+
+  const body = document.getElementById('modal-body');
+
+  if (room.content === 'GIFT_ROOM') {
+    body.innerHTML = buildGiftRoom();
+  } else {
+    body.innerHTML = room.content;
+  }
+
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+  document.body.style.overflow = 'auto';
+}
+
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ==================== GIFT ROOM ====================
+const gifts = [
+  { id: 'rice', icon: '\u{1F35A}', name: 'Rice & Chicken' },
+  { id: 'cake', icon: '\u{1F382}', name: 'Cake' },
+  { id: 'parfait', icon: '\u{1F368}', name: 'Parfait' },
+  { id: 'pizza', icon: '\u{1F355}', name: 'Pizza' },
+  { id: 'flowers', icon: '\u{1F490}', name: 'Flowers' },
+  { id: 'chocolate', icon: '\u{1F36B}', name: 'Chocolate Box' },
+  { id: 'icecream', icon: '\u{1F366}', name: 'Ice Cream' },
+  { id: 'surprise', icon: '\u{1F381}', name: 'Surprise Me!' },
+];
+let selectedGifts = new Set();
+
+function buildGiftRoom() {
+  selectedGifts.clear();
+  let html = '<p style="text-align:center; margin-bottom:20px;">Pick up to 2 gifts you\'d like! I\'ll make it happen.</p>';
+  html += '<div class="gift-grid">';
+  gifts.forEach(g => {
+    html += `<div class="gift-card" id="gift-${g.id}" onclick="toggleGift('${g.id}')">
+      <div class="gift-icon">${g.icon}</div>
+      <div class="gift-name">${g.name}</div>
+    </div>`;
+  });
+  html += '</div>';
+  html += `<div class="gift-order-section">
+    <div class="gift-selected-list" id="gift-selected">Select your favorites above</div>
+    <button class="order-btn" id="order-btn" onclick="placeOrder()">Send My Order</button>
+  </div>`;
+  return html;
+}
+
+function toggleGift(id) {
+  const card = document.getElementById('gift-' + id);
+  if (selectedGifts.has(id)) {
+    selectedGifts.delete(id);
+    card.classList.remove('selected');
+  } else {
+    if (selectedGifts.size >= 2) {
+      alert('You can only pick 2 gifts max!');
+      return;
+    }
+    selectedGifts.add(id);
+    card.classList.add('selected');
+  }
+  updateGiftList();
+}
+
+function updateGiftList() {
+  const el = document.getElementById('gift-selected');
+  if (selectedGifts.size === 0) {
+    el.textContent = 'Select your favorites above';
+  } else {
+    const names = [...selectedGifts].map(id => gifts.find(g => g.id === id).name);
+    el.innerHTML = '<strong>Your picks:</strong> ' + names.join(', ');
+  }
+}
+
+function placeOrder() {
+  if (selectedGifts.size === 0) {
+    alert('Pick at least one gift first!');
+    return;
+  }
+  const names = [...selectedGifts].map(id => gifts.find(g => g.id === id).name);
+  const message = `Hi babe! I'd love to have: ${names.join(', ')} \u{1F49D}`;
+  const phone = PHONE_NUMBER.replace(/\D/g, '');
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank');
+}
+
+// ==================== SPOTLIGHT EFFECT ====================
+const spotlightLayer = document.getElementById('spotlight-layer');
+document.addEventListener('mousemove', (e) => {
+  spotlightLayer.style.setProperty('--sx', e.clientX + 'px');
+  spotlightLayer.style.setProperty('--sy', e.clientY + 'px');
+});
+
+// ==================== FLOATING LOVE EMOJIS ====================
+let floatingActive = false;
+const loveEmojis = ['\u2764\uFE0F', '\u{1F495}', '\u{1F496}', '\u{1F497}', '\u{1F49D}', '\u{1F49E}', '\u{1F49F}', '\u{1F48B}', '\u{1F338}', '\u{1F33A}', '\u2728', '\u{1F31F}', '\u{1F490}', '\u{1F48C}'];
+function startFloatingEmojis() {
+  if (floatingActive) return;
+  floatingActive = true;
+  function spawnEmoji() {
+    if (!floatingActive) return;
+    const el = document.createElement('div');
+    el.className = 'floating-emoji';
+    el.textContent = loveEmojis[Math.floor(Math.random() * loveEmojis.length)];
+    el.style.left = (Math.random() * 100) + 'vw';
+    el.style.bottom = '-40px';
+    el.style.fontSize = (Math.random() * 16 + 14) + 'px';
+    const duration = Math.random() * 8 + 8;
+    el.style.animationDuration = duration + 's';
+    el.style.animationDelay = '0s';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), duration * 1000);
+    setTimeout(spawnEmoji, Math.random() * 1200 + 600);
+  }
+  spawnEmoji();
+}
+
+// Focus first otp box on load
+window.addEventListener('load', () => otpBoxes[0].focus());
+</script>
+</body>
+</html>
